@@ -130,8 +130,8 @@ function App() {
     <div className="app">
       <header className="navbar">
         <a className="logo" href="#home">
-          <span className="logo-mark">C</span>
-          <span>confluencr</span>
+          <span className="logo-mark">A</span>
+          <span>Assignment</span>
           <span className="logo-ai">AI</span>
         </a>
 
@@ -251,9 +251,7 @@ function App() {
                 )}
               </button>
 
-              <p className="form-note">
-                ✦ AI-generated content · Review before publishing
-              </p>
+              
             </form>
           </div>
 
@@ -261,10 +259,10 @@ function App() {
             {!brandVoice && tweets.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">✳</div>
-                <span className="empty-label">YOUR WORKSPACE</span>
-                <h2>Ideas start here.</h2>
+                <span className="empty-label">WORKSPACE</span>
+                <h2>It start here.</h2>
                 <p>
-                  Fill in your brand details and let AI turn them into
+                  Fill the brand details and let AI turn them into
                   on-brand content.
                 </p>
 
@@ -419,8 +417,8 @@ function App() {
         )}
 
         <footer className="footer">
-          <span>confluencr AI studio</span>
-          <span>Made for better brand conversations.</span>
+          <span>Assignment for Confluencr</span>
+          <span>Made by Priyanshu Singh</span>
         </footer>
       </main>
     </div>

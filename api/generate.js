@@ -1,4 +1,10 @@
 
+import Groq from "groq-sdk";
+
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -66,16 +72,18 @@ export default async function handler(req, res) {
       });
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({
-        message: "OpenRouter API key is not configured.",
+        message: "Groq API key is not configured.",
       });
     }
 
     const prompt = `
 You are an expert brand strategist and social media copywriter.
+
+Analyze the following brand information and generate exactly 10 unique, engaging tweets for X (Twitter).
 
 Brand: ${brandName.trim() || "Not specified"}
 Industry: ${industry.trim() || "Infer from context"}
@@ -83,10 +91,14 @@ Campaign objective: ${objective}
 Product details: ${productDetails.trim() || "Not specified"}
 
 Requirements:
-- Infer tone, target audience and content themes.
+- Infer the brand tone, target audience and content themes.
 - Write in a suitable brand voice.
-- Mix conversational, promotional, witty and informative
-  content when appropriate.
+- Use a suitable combination of witty, conversational, premium,
+  humorous, professional, bold, friendly, minimal, informative,
+  and inspirational tones or writing styles, as appropriate
+  to the brand's personality, target audience, and campaign objective.
+- Maintain a consistent brand voice while varying tweet styles
+  naturally where appropriate.
 - Keep tweets concise and suitable for X/Twitter.
 - Avoid repetitive ideas and generic filler.
 - Never invent prices, statistics, offers or product facts.
@@ -96,7 +108,7 @@ Requirements:
 Required structure:
 {
   "brandVoice": {
-    "tone": ["Witty", "Conversational"],
+    "tone": ["Tone 1", "Tone 2", "Tone 3", "Tone 4"],
     "targetAudience": "Audience description",
     "contentThemes": ["Theme 1", "Theme 2", "Theme 3"],
     "summary": "Short brand voice summary"
@@ -112,42 +124,23 @@ Required structure:
 Return exactly 10 tweet objects.
 `;
 
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
+    const completion = await groq.chat.completions.create({
+      model:
+        process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
         },
-        body: JSON.stringify({
-          model: process.env.OPENROUTER_MODEL || "openrouter/free",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 4000,
-          response_format: {
-            type: "json_object",
-          },
-        }),
-      }
-    );
+      ],
+      temperature: 0.7,
+      max_completion_tokens: 4000,
+      response_format: {
+        type: "json_object",
+      },
+    });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("OpenRouter error:", data);
-
-      throw new Error(
-        data.error?.message || "OpenRouter request failed."
-      );
-    }
-
-    const raw = data.choices?.[0]?.message?.content;
+    const raw = completion.choices?.[0]?.message?.content;
 
     if (!raw) {
       throw new Error("The AI returned an empty response.");
@@ -176,11 +169,10 @@ Return exactly 10 tweet objects.
       tweets,
     });
   } catch (error) {
-    console.error("Generation failed:", error);
+    console.error("Groq generation failed:", error);
 
     return res.status(500).json({
-      message:
-        "Tweet generation failed. Check your OpenRouter API key, model and quota, then retry.",
+      message: "Tweet generation failed. Try again.",
     });
   }
 }
