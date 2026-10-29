@@ -220,7 +220,7 @@ function App() {
               <div className="form-group">
                 <label htmlFor="productDetails">
                   Product / brand details{" "}
-                  <span className="optional">Optional</span>
+                  
                 </label>
                 <textarea
                   id="productDetails"
